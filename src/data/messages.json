@@ -1,0 +1,37 @@
+{
+  "BOAS_VINDAS": {
+    "estado": "BOAS_VINDAS",
+    "mensagem": "Olá! Seja bem-vindo(a) ao assistente virtual do **Instituto Conecta Vida**.\n*(Este é um projeto demonstrativo para Portfólio)*\n\nComo podemos ajudar hoje? Digite o número da opção desejada:",
+    "menu": [
+      "1. Solicitar Novo Acolhimento",
+      "2. Consultar / Gerenciar Agendamento Existente",
+      "3. Quero ser um Voluntário",
+      "#. Encerrar conversa"
+    ]
+  },
+  "ACOLHIMENTO_ORIENTACAO": {
+    "estado": "ACOLHIMENTO_ORIENTACAO",
+    "mensagem": "Perfeito! O Instituto Conecta Vida oferece suporte psicológico e social gratuito. Selecione uma opção:",
+    "menu": ["1. Agendar primeiro atendimento (Triagem)", "0. Voltar ao menu anterior", "#. Encerrar conversa"]
+  },
+  "SOLICITAR_CPF": {
+    "estado": "SOLICITAR_CPF",
+    "mensagem": "Para localizarmos o seu registo ou iniciar o agendamento, por favor, **digite o seu CPF** (apenas os 11 números).\n\n💡 *Dica de Portfólio: Para testar a busca de um agendamento já existente, digite o CPF de teste:* **12345678901**",
+    "menu": []
+  },
+  "TORNAR_VOLUNTARIO": {
+    "estado": "TORNAR_VOLUNTARIO",
+    "mensagem": "Ficamos muito felizes com o seu interesse em apoiar o Conecta Vida! Atualmente temos vagas para profissionais de psicologia e assistência social.",
+    "menu": ["1. Falar com a equipe de Recursos Humanos", "0. Voltar ao menu anterior"]
+  },
+  "ATENDIMENTO_HUMANO": {
+    "estado": "ATENDIMENTO_HUMANO",
+    "mensagem": "Compreendido. Estou a transferir o seu atendimento para a nossa equipa humana. Em instantes um de nossos atendentes continuará a conversa por aqui.\n\n*(Fim do fluxo do Chatbot - Digite '#' a qualquer momento para resetar)*",
+    "menu": []
+  },
+  "TIMEOUT": {
+    "estado": "ATENDIMENTO_HUMANO",
+    "mensagem": "⚠️ Identifiquei múltiplas tentativas inválidas. Para sua comodidade, estou a transferir este contacto para um atendente humano.",
+    "menu": []
+  }
+}
