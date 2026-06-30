@@ -19,7 +19,7 @@ async function processarMensagem(idUsuario, opcao) {
   let dadosEstado = await estadoRepository.buscarEstadoPorUsuario(idUsuario);
 
   let estado = dadosEstado ? dadosEstado.estado : EstadoConversa.BOAS_VINDAS;
-  let tentativasAtuais = dadosEstado ? dadosEstado.tentativas_atuais : 0;
+  let tentativasAtuais = dadosEstado ? dadosEstado.tentativas_invalidas : 0;
 
   // Se o usuário digitar #, reseta o fluxo para o início
   if (opcao === "#") {
@@ -121,7 +121,28 @@ async function processarMensagem(idUsuario, opcao) {
     }
   }
 
-  // ... (Tratativas para TORNAR_VOLUNTARIO e ATENDIMENTO_HUMANO)
+  // ==========================================
+  // ESTADO: TORNAR_VOLUNTARIO
+  // ==========================================
+  if (estado === EstadoConversa.TORNAR_VOLUNTARIO) {
+    if (opcao === "0") {
+      await estadoRepository.salvarEstadoUsuario(idUsuario, EstadoConversa.BOAS_VINDAS, 0);
+      return formatarResposta(MENSAGENS.BOAS_VINDAS);
+    }
+    if (opcao === "1") {
+      await estadoRepository.salvarEstadoUsuario(idUsuario, EstadoConversa.ATENDIMENTO_HUMANO, 0);
+      return formatarResposta(MENSAGENS.ATENDIMENTO_HUMANO);
+    }
+
+    return processarOpcaoInvalida(idUsuario, estado, tentativasAtuais);
+  }
+
+  // ==========================================
+  // ESTADO: ATENDIMENTO_HUMANO
+  // ==========================================
+  if (estado === EstadoConversa.ATENDIMENTO_HUMANO) {
+    return formatarResposta(MENSAGENS.ATENDIMENTO_HUMANO);
+  }
 }
 
 // Funções Repassadas para a REST API (Apenas servem de ponte para o Repository)

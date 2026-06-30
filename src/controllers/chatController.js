@@ -10,7 +10,7 @@ async function enviarMensagem(req, res) {
       });
     }
 
-    const respostaBot = await chatbotService.processarMensagemChatbot(idUsuario, mensagem);
+    const respostaBot = await chatbotService.processarMensagem(idUsuario, mensagem);
 
     return res.status(200).json(respostaBot);
   } catch (error) {
