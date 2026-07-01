@@ -145,16 +145,6 @@ async function processarMensagem(idUsuario, opcao) {
   }
 }
 
-// Funções Repassadas para a REST API (Apenas servem de ponte para o Repository)
-async function listarTodosAgendamentos() {
-  return await agendamentoRepository.listarTodos();
-}
-async function atualizarAgendamento(id, dados) {
-  return await agendamentoRepository.atualizar(id, dados);
-}
-async function deletarAgendamento(id) {
-  return await agendamentoRepository.deletar(id);
-}
 
 // Função auxiliar de tratamento de erros de digitação do menu
 async function processarOpcaoInvalida(idUsuario, estado, tentativasAtuais, msgCustomizada = null) {
@@ -173,9 +163,4 @@ async function processarOpcaoInvalida(idUsuario, estado, tentativasAtuais, msgCu
   };
 }
 
-module.exports = {
-  processarMensagem,
-  listarTodosAgendamentos,
-  atualizarAgendamento,
-  deletarAgendamento,
-};
+module.exports = { processarMensagem };

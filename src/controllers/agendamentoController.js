@@ -1,4 +1,4 @@
-const chatbotService = require("../services/chatbotService");
+const agendamentoService = require("../services/agendamentoService");
 
 /**
  * GET /api/agendamentos
@@ -6,7 +6,7 @@ const chatbotService = require("../services/chatbotService");
  */
 async function listar(req, res) {
   try {
-    const agendamentos = await chatbotService.listarTodosAgendamentos();
+    const agendamentos = await agendamentoService.listarTodosAgendamentos();
     return res.status(200).json(agendamentos);
   } catch (error) {
     return res.status(500).json({ error: "Erro ao buscar a lista de agendamentos." });
@@ -25,7 +25,7 @@ async function atualizar(req, res) {
     // Impede a alteração acidental de campos sensíveis como o ID do registro
     delete dadosParaAtualizar.id;
 
-    const agendamentoAtualizado = await chatbotService.atualizarAgendamento(id, dadosParaAtualizar);
+    const agendamentoAtualizado = await agendamentoService.atualizarAgendamento(id, dadosParaAtualizar);
 
     if (!agendamentoAtualizado) {
       return res.status(404).json({ error: "Agendamento não localizado para atualização." });
@@ -47,7 +47,7 @@ async function atualizar(req, res) {
 async function deletar(req, res) {
   try {
     const { id } = req.params;
-    await chatbotService.deletarAgendamento(id);
+    await agendamentoService.deletarAgendamento(id);
 
     return res.status(200).json({ message: "Agendamento removido do sistema com sucesso." });
   } catch (error) {
