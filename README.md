@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </div>
 
-------
+---
 
 <br />
 
@@ -32,7 +32,7 @@ O sistema evoluiu de um chatbot operacional para uma arquitetura backend baseada
 > [!NOTE]
 > Este projeto foi desenvolvido para fins demonstrativos e acadêmicos, integrando competências de desenvolvimento backend em Node.js com serviços em nuvem (Supabase/PostgreSQL).
 
-------
+---
 
 ## 🏛️ Arquitetura do Sistema
 
@@ -55,27 +55,27 @@ messages.json]
 estados.js]
 ```
 
-| Camada | Diretório | Responsabilidade |
-| :--- | :--- | :--- |
-| **Routes** | `src/routes/` | Define os endpoints da API e encaminha as requisições para os controllers |
-| **Controllers** | `src/controllers/` | Valida os dados da requisição e aciona a camada de serviço |
-| **Services** | `src/services/` | Contém toda a lógica de negócio e a máquina de estados do chatbot |
-| **Repositories** | `src/repositories/` | Centraliza o acesso ao banco de dados, isolando as operações realizadas no Supabase |
-| **Utils** | `src/utils/` | Fornece funções auxiliares reutilizáveis (validação, formatação, higienização) |
-| **Constants** | `src/constants/` | Centraliza constantes utilizadas pela aplicação, como os estados da máquina de conversação |
-| **Config** | `src/config/` | Instancia e configura o cliente de acesso ao Supabase |
-| **Data** | `src/data/` | Armazena os textos e menus do chatbot em formato estático (JSON) |
+| Camada           | Diretório           | Responsabilidade                                                                           |
+| :--------------- | :------------------ | :----------------------------------------------------------------------------------------- |
+| **Routes**       | `src/routes/`       | Define os endpoints da API e encaminha as requisições para os controllers                  |
+| **Controllers**  | `src/controllers/`  | Valida os dados da requisição e aciona a camada de serviço                                 |
+| **Services**     | `src/services/`     | Contém toda a lógica de negócio e a máquina de estados do chatbot                          |
+| **Repositories** | `src/repositories/` | Centraliza o acesso ao banco de dados, isolando as operações realizadas no Supabase        |
+| **Utils**        | `src/utils/`        | Fornece funções auxiliares reutilizáveis (validação, formatação, higienização)             |
+| **Constants**    | `src/constants/`    | Centraliza constantes utilizadas pela aplicação, como os estados da máquina de conversação |
+| **Config**       | `src/config/`       | Instancia e configura o cliente de acesso ao Supabase                                      |
+| **Data**         | `src/data/`         | Armazena os textos e menus do chatbot em formato estático (JSON)                           |
 
 > [!TIP]
 > **Benefícios dessa arquitetura**
-> * Separação clara de responsabilidades
-> * Facilidade para manutenção e evolução do código
-> * Reutilização de funções utilitárias
-> * Menor acoplamento entre as camadas
-> * Código mais organizado e escalável
+>
+> - Separação clara de responsabilidades
+> - Facilidade para manutenção e evolução do código
+> - Reutilização de funções utilitárias
+> - Menor acoplamento entre as camadas
+> - Código mais organizado e escalável
 
-
-------
+---
 
 ## 🔄 Fluxo do Chatbot
 
@@ -114,31 +114,31 @@ Cada usuário é identificado por um `idUsuario` único. Ao receber uma mensagem
 
 As transições entre estados são gerenciadas por funções dedicadas dentro do `chatbotService.js`. Entradas inválidas incrementam um contador de tentativas; ao atingir três erros consecutivos em qualquer estado do fluxo, o usuário é automaticamente encaminhado para `ATENDIMENTO_HUMANO`. O comando `#` funciona como um atalho global que encerra a sessão corrente e retorna o usuário ao menu inicial (`BOAS_VINDAS`), independentemente do estado em que se encontra.
 
-------
+---
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Tecnologia / Biblioteca | Função no Projeto | Versão |
-| :--- | :--- | :--- |
-| **Node.js** | Ambiente de execução JavaScript assíncrono no servidor | v18+ |
-| **Express** | Framework web para criação dos endpoints e middlewares da API | ^5.2.1 |
-| **Supabase (@supabase/supabase-js)** | Banco de dados relacional PostgreSQL na nuvem e persistência | ^2.108.2 |
-| **dotenv** | Gerenciamento seguro de variáveis de ambiente | ^17.4.2 |
-| **cors** | Habilitação e controle de compartilhamento de recursos entre origens | ^2.8.6 |
+| Tecnologia / Biblioteca              | Função no Projeto                                                    | Versão   |
+| :----------------------------------- | :------------------------------------------------------------------- | :------- |
+| **Node.js**                          | Ambiente de execução JavaScript assíncrono no servidor               | v18+     |
+| **Express**                          | Framework web para criação dos endpoints e middlewares da API        | ^5.2.1   |
+| **Supabase (@supabase/supabase-js)** | Banco de dados relacional PostgreSQL na nuvem e persistência         | ^2.108.2 |
+| **dotenv**                           | Gerenciamento seguro de variáveis de ambiente                        | ^17.4.2  |
+| **cors**                             | Habilitação e controle de compartilhamento de recursos entre origens | ^2.8.6   |
 
-------
+---
 
 ## 🧠 Arquitetura e Diferenciais Técnicos
 
-* **Persistência de Contexto (Máquina de Estados):** O estado da conversa (`BOAS_VINDAS`, `ACOLHIMENTO_ORIENTACAO`, `SOLICITAR_CPF`, `TORNAR_VOLUNTARIO`, `ATENDIMENTO_HUMANO`) é gravado em tempo real no banco de dados.
-* **Validação e Tratamento de Input:** As entradas textuais de primeiro contato passam por limpeza de caracteres especiais, conversão para minúsculo e remoção de acentos via Regex, permitindo interações mais fluidas (ex: identificar "Olá", "oi", "bom dia").
-* **Regras de Negócio de Triagem:** 
-  * Busca em tempo real de agendamentos associados a um CPF específico.
-  * Cadastro automatizado (INSERT) de um novo atendimento de triagem caso o CPF não possua histórico no sistema.
-* **Mecanismo de Segurança e Fallback:** Caso o usuário digite uma opção inválida por 3 vezes consecutivas, o sistema direciona automaticamente o contato para a fila de atendimento humano (`ATENDIMENTO_HUMANO`).
-* **Comando de Redirecionamento Global:** O envio de `#` em qualquer etapa finaliza a sessão corrente e redefine o estado do usuário para o menu inicial.
+- **Persistência de Contexto (Máquina de Estados):** O estado da conversa (`BOAS_VINDAS`, `ACOLHIMENTO_ORIENTACAO`, `SOLICITAR_CPF`, `TORNAR_VOLUNTARIO`, `ATENDIMENTO_HUMANO`) é gravado em tempo real no banco de dados.
+- **Validação e Tratamento de Input:** As entradas textuais de primeiro contato passam por limpeza de caracteres especiais, conversão para minúsculo e remoção de acentos via Regex, permitindo interações mais fluidas (ex: identificar "Olá", "oi", "bom dia").
+- **Regras de Negócio de Triagem:**
+  - Busca em tempo real de agendamentos associados a um CPF específico.
+  - Cadastro automatizado (INSERT) de um novo atendimento de triagem caso o CPF não possua histórico no sistema.
+- **Mecanismo de Segurança e Fallback:** Caso o usuário digite uma opção inválida por 3 vezes consecutivas, o sistema direciona automaticamente o contato para a fila de atendimento humano (`ATENDIMENTO_HUMANO`).
+- **Comando de Redirecionamento Global:** O envio de `#` em qualquer etapa finaliza a sessão corrente e redefine o estado do usuário para o menu inicial.
 
-------
+---
 
 ## 🗄️ Estrutura do Banco de Dados
 
@@ -162,7 +162,7 @@ erDiagram
     }
 ```
 
-------
+---
 
 ## 📂 Estrutura de Pastas
 
@@ -192,28 +192,33 @@ erDiagram
  ┗ 📜 package.json           # Dependências e scripts de desenvolvimento
 ```
 
-------
+---
 
 ## ⚙️ Configuração e Instalação Local
 
 ### Pré-requisitos
-* [Node.js](https://nodejs.org/) (versão 18 ou superior)
-* Gerenciador de pacotes `npm`
-* Conta ativa ou projeto configurado no [Supabase](https://supabase.com/)
+
+- [Node.js](https://nodejs.org/) (versão 18 ou superior)
+- Gerenciador de pacotes `npm`
+- Conta ativa ou projeto configurado no [Supabase](https://supabase.com/)
 
 ### Passo 1: Clonar o Repositório
+
 ```bash
 git clone https://github.com/jrs-neto/chatbot.git
 cd chatbot
 ```
 
 ### Passo 2: Instalar Dependências
+
 ```bash
 npm install
 ```
 
 ### Passo 3: Configurar Variáveis de Ambiente
+
 Crie um arquivo `.env` na raiz do projeto e preencha-o com as chaves correspondentes:
+
 ```env
 PORT=3000
 SUPABASE_URL=https://seu-projeto.supabase.co
@@ -221,31 +226,37 @@ SUPABASE_KEY=sua-chave-anon-public-supabase
 ```
 
 ### Passo 4: Executar a Aplicação
+
 Inicie o servidor Express localmente com o comando:
+
 ```bash
 npm run dev
 ```
+
 O console exibirá a confirmação de que o servidor está em execução:
+
 ```text
 ==================================================
 🤖 Chatbot Server running on: http://localhost:3000
 ==================================================
 ```
 
-------
+---
 
 ## 🚀 Como Testar o Webhook
 
 A comunicação principal é realizada via requisições HTTP utilizando o método `POST` diretamente no endpoint de webhook do chatbot.
 
 ### Endpoint de Webhook
-* **URL:** `http://localhost:3000/api/webhook`
-* **Método:** `POST`
-* **Headers:** `Content-Type: application/json`
+
+- **URL:** `http://localhost:3000/api/webhook`
+- **Método:** `POST`
+- **Headers:** `Content-Type: application/json`
 
 #### Corpo da Requisição (JSON)
-* `idUsuario` (String): Identificador único do contato (ex: número telefônico ou hash do usuário).
-* `mensagem` (String): A mensagem ou opção digitada.
+
+- `idUsuario` (String): Identificador único do contato (ex: número telefônico ou hash do usuário).
+- `mensagem` (String): A mensagem ou opção digitada.
 
 ```json
 {
@@ -255,7 +266,9 @@ A comunicação principal é realizada via requisições HTTP utilizando o méto
 ```
 
 #### Retorno do Servidor (JSON)
+
 O servidor retorna o texto formatado do menu subsequente e o respectivo estado da conversa persistido.
+
 ```json
 {
   "text": "Olá! Seja bem-vindo(a) ao assistente virtual do **Instituto Conecta Vida**.\n*(Este é um projeto demonstrativo para Portfólio)*\n\nComo podemos ajudar hoje? Digite o número da opção desejada:\n\n1. Solicitar Novo Acolhimento\n2. Consultar / Gerenciar Agendamento Existente\n3. Quero ser um Voluntário\n#. Encerrar conversa",
@@ -263,48 +276,51 @@ O servidor retorna o texto formatado do menu subsequente e o respectivo estado d
 }
 ```
 
-------
+---
 
 ## 🗂️ Fluxos de Demonstração (Massa de Testes)
 
 Utilize os roteiros abaixo no seu cliente HTTP (Insomnia, Postman ou cURL) para avaliar as ramificações lógicas do webhook do chatbot:
 
 ### 1. Consulta de Agendamento Existente (Sucesso)
-* Envie `"Olá"` para `idUsuario: "user-123"` para receber o menu principal.
-* Envie `"2"` para acessar a consulta de agendamentos.
-* Digite o CPF de teste pré-cadastrado no banco: `12345678901`
-* **Retorno Esperado:** O bot localizará as informações de agendamento existentes no Supabase e exibirá os detalhes (profissional, data, hora, etc.).
+
+- Envie `"Olá"` para `idUsuario: "user-123"` para receber o menu principal.
+- Envie `"2"` para acessar a consulta de agendamentos.
+- Digite o CPF de teste pré-cadastrado no banco: `12345678901`
+- **Retorno Esperado:** O bot localizará as informações de agendamento existentes no Supabase e exibirá os detalhes (profissional, data, hora, etc.).
 
 ### 2. Cadastro de Triagem Automática (Novo Registro)
-* Envie `"Olá"` para `idUsuario: "user-456"` para receber o menu principal.
-* Envie `"1"` para solicitar um novo acolhimento.
-* Envie `"1"` novamente para agendar a triagem.
-* Digite um CPF não registrado no sistema (ex: `98765432109`).
-* **Retorno Esperado:** O sistema gerará um novo registro de triagem agendado para o dia seguinte no banco de dados e confirmará as informações ao usuário.
+
+- Envie `"Olá"` para `idUsuario: "user-456"` para receber o menu principal.
+- Envie `"1"` para solicitar um novo acolhimento.
+- Envie `"1"` novamente para agendar a triagem.
+- Digite um CPF não registrado no sistema (ex: `98765432109`).
+- **Retorno Esperado:** O sistema gerará um novo registro de triagem agendado para o dia seguinte no banco de dados e confirmará as informações ao usuário.
 
 ### 3. Mecanismo de Timeout por Tentativas
-* A partir do menu principal, envie respostas inválidas sucessivas (ex: `"x"`, `"y"`, `"z"`).
-* Ao alcançar a 3ª tentativa inválida consecutiva, o sistema retornará a mensagem de encaminhamento automático para a equipe humana.
 
-------
+- A partir do menu principal, envie respostas inválidas sucessivas (ex: `"x"`, `"y"`, `"z"`).
+- Ao alcançar a 3ª tentativa inválida consecutiva, o sistema retornará a mensagem de encaminhamento automático para a equipe humana.
+
+---
 
 ## 🤝 Contribuições
 
 Este repositório possui fins educacionais e de demonstração prática. Sugestões de melhorias ou correções de bugs podem ser enviadas por meio de **Issues** ou **Pull Requests**.
 
-------
+---
 
 ## ⚖️ Licença
 
 Este projeto está licenciado sob a licença **MIT** — livre para uso educacional e profissional.
 
-------
+---
 
 ## 📞 Contato
 
 Desenvolvido por [**José Rodrigues**](https://github.com/jrs-neto)
 Para dúvidas, sugestões ou colaborações, utilize as **issues do GitHub** ou entre em contato diretamente pelo perfil:
 
-* 🔗 **GitHub:** https://github.com/jrs-neto
-* 🔗 **LinkedIn:** https://www.linkedin.com/in/jrodrigues-neto/
-* 🔗 **Portfólio:** https://jrs-neto.github.io/portfolio/
+- 🔗 **GitHub:** https://github.com/jrs-neto
+- 🔗 **LinkedIn:** https://www.linkedin.com/in/jrodrigues-neto/
+- 🔗 **Portfólio:** https://jrs-neto.github.io/portfolio/

@@ -4,12 +4,12 @@
  * @returns {string} Texto higienizado
  */
 function higienizarTexto(texto) {
-  if (!texto) return "";
+  if (!texto) return '';
   return texto
     .trim()
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 }
 
 module.exports = higienizarTexto;

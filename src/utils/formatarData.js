@@ -1,6 +1,6 @@
 function formatarData(data) {
-  return new Date(data).toLocaleString("pt-BR", {
-    timeZone: "America/Sao_Paulo",
+  return new Date(data).toLocaleString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
   });
 }
 

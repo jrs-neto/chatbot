@@ -1,4 +1,4 @@
-const agendamentoService = require("../services/agendamentoService");
+const agendamentoService = require('../services/agendamentoService');
 
 /**
  * GET /api/agendamentos
@@ -9,8 +9,8 @@ async function listar(req, res) {
     const agendamentos = await agendamentoService.listarTodosAgendamentos();
     return res.status(200).json(agendamentos);
   } catch (error) {
-    console.error("Erro ao buscar a lista de agendamentos:", error);
-    return res.status(500).json({ error: "Erro ao buscar a lista de agendamentos." });
+    console.error('Erro ao buscar a lista de agendamentos:', error);
+    return res.status(500).json({ error: 'Erro ao buscar a lista de agendamentos.' });
   }
 }
 
@@ -25,19 +25,22 @@ async function atualizar(req, res) {
     // Desestruturação funcional para descartar o ID do corpo
     const { id: _, ...dadosParaAtualizar } = req.body;
 
-    const agendamentoAtualizado = await agendamentoService.atualizarAgendamento(id, dadosParaAtualizar);
+    const agendamentoAtualizado = await agendamentoService.atualizarAgendamento(
+      id,
+      dadosParaAtualizar,
+    );
 
     if (!agendamentoAtualizado) {
-      return res.status(404).json({ error: "Agendamento não localizado para atualização." });
+      return res.status(404).json({ error: 'Agendamento não localizado para atualização.' });
     }
 
     return res.status(200).json({
-      message: "Agendamento atualizado com sucesso!",
+      message: 'Agendamento atualizado com sucesso!',
       data: agendamentoAtualizado,
     });
   } catch (error) {
     console.error(`Erro ao atualizar o agendamento ID ${req.params.id}:`, error);
-    return res.status(500).json({ error: "Erro ao tentar atualizar o agendamento." });
+    return res.status(500).json({ error: 'Erro ao tentar atualizar o agendamento.' });
   }
 }
 
@@ -50,10 +53,10 @@ async function deletar(req, res) {
     const { id } = req.params;
     await agendamentoService.deletarAgendamento(id);
 
-    return res.status(200).json({ message: "Agendamento removido com sucesso!" });
+    return res.status(200).json({ message: 'Agendamento removido com sucesso!' });
   } catch (error) {
     console.error(`Erro ao deletar o agendamento ID ${req.params.id}:`, error);
-    return res.status(500).json({ error: "Erro ao tentar deletar o agendamento." });
+    return res.status(500).json({ error: 'Erro ao tentar deletar o agendamento.' });
   }
 }
 

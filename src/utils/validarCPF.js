@@ -6,7 +6,7 @@
 function validarCPF(entrada) {
   if (!entrada) return null;
 
-  const cpfLimpo = entrada.replace(/\D/g, "");
+  const cpfLimpo = entrada.replace(/\D/g, '');
 
   if (cpfLimpo.length !== 11) {
     return null;

@@ -1,11 +1,11 @@
-const agendamentoRepository = require("../repositories/agendamentoRepository");
-const estadoRepository = require("../repositories/estadoRepository");
-const EstadoConversa = require("../constants/estados");
-const MENSAGENS = require("../data/messages.json");
-const formatarResposta = require("../utils/formatarResposta");
-const validarCPF = require("../utils/validarCPF");
-const formatarData = require("../utils/formatarData");
-const higienizarTexto = require("../utils/higienizarTexto");
+const agendamentoRepository = require('../repositories/agendamentoRepository');
+const estadoRepository = require('../repositories/estadoRepository');
+const EstadoConversa = require('../constants/estados');
+const MENSAGENS = require('../data/messages.json');
+const formatarResposta = require('../utils/formatarResposta');
+const validarCPF = require('../utils/validarCPF');
+const formatarData = require('../utils/formatarData');
+const higienizarTexto = require('../utils/higienizarTexto');
 
 // FUNÇÕES AUXILIARES
 
@@ -41,19 +41,40 @@ async function processarOpcaoInvalida(idUsuario, estado, tentativasAtuais, msgCu
 
 async function gerenciarBoasVindas(idUsuario, opcao, tentativasAtuais) {
   const mensagemTratada = higienizarTexto(opcao);
-  const saudacoes = ["oi", "ola", "bom dia", "boa tarde", "boa noite", "ajuda", "inicio", "comecar"];
+  const saudacoes = [
+    'oi',
+    'ola',
+    'bom dia',
+    'boa tarde',
+    'boa noite',
+    'ajuda',
+    'inicio',
+    'comecar',
+  ];
 
   if (saudacoes.includes(mensagemTratada) || isNaN(mensagemTratada)) {
     return formatarResposta(MENSAGENS.BOAS_VINDAS);
   }
 
   switch (opcao) {
-    case "1":
-      return await transicionarPara(idUsuario, EstadoConversa.ACOLHIMENTO_ORIENTACAO, MENSAGENS.ACOLHIMENTO_ORIENTACAO);
-    case "2":
-      return await transicionarPara(idUsuario, EstadoConversa.SOLICITAR_CPF, MENSAGENS.SOLICITAR_CPF);
-    case "3":
-      return await transicionarPara(idUsuario, EstadoConversa.TORNAR_VOLUNTARIO, MENSAGENS.TORNAR_VOLUNTARIO);
+    case '1':
+      return await transicionarPara(
+        idUsuario,
+        EstadoConversa.ACOLHIMENTO_ORIENTACAO,
+        MENSAGENS.ACOLHIMENTO_ORIENTACAO,
+      );
+    case '2':
+      return await transicionarPara(
+        idUsuario,
+        EstadoConversa.SOLICITAR_CPF,
+        MENSAGENS.SOLICITAR_CPF,
+      );
+    case '3':
+      return await transicionarPara(
+        idUsuario,
+        EstadoConversa.TORNAR_VOLUNTARIO,
+        MENSAGENS.TORNAR_VOLUNTARIO,
+      );
     default:
       return processarOpcaoInvalida(idUsuario, EstadoConversa.BOAS_VINDAS, tentativasAtuais);
   }
@@ -61,12 +82,20 @@ async function gerenciarBoasVindas(idUsuario, opcao, tentativasAtuais) {
 
 async function gerenciarAcolhimento(idUsuario, opcao, tentativasAtuais) {
   switch (opcao) {
-    case "0":
+    case '0':
       return await transicionarPara(idUsuario, EstadoConversa.BOAS_VINDAS, MENSAGENS.BOAS_VINDAS);
-    case "1":
-      return await transicionarPara(idUsuario, EstadoConversa.SOLICITAR_CPF, MENSAGENS.SOLICITAR_CPF);
+    case '1':
+      return await transicionarPara(
+        idUsuario,
+        EstadoConversa.SOLICITAR_CPF,
+        MENSAGENS.SOLICITAR_CPF,
+      );
     default:
-      return processarOpcaoInvalida(idUsuario, EstadoConversa.ACOLHIMENTO_ORIENTACAO, tentativasAtuais);
+      return processarOpcaoInvalida(
+        idUsuario,
+        EstadoConversa.ACOLHIMENTO_ORIENTACAO,
+        tentativasAtuais,
+      );
   }
 }
 
@@ -78,7 +107,7 @@ async function gerenciarSolicitarCPF(idUsuario, opcao, tentativasAtuais) {
       idUsuario,
       EstadoConversa.SOLICITAR_CPF,
       tentativasAtuais,
-      "⚠️ CPF inválido. Por favor, digite um CPF válido contendo exatamente 11 números.",
+      '⚠️ CPF inválido. Por favor, digite um CPF válido contendo exatamente 11 números.',
     );
   }
 
@@ -99,8 +128,8 @@ async function gerenciarSolicitarCPF(idUsuario, opcao, tentativasAtuais) {
     dataTriagem.setDate(dataTriagem.getDate() + 1);
 
     const novoAgendamento = await agendamentoRepository.criar({
-      id_voluntario: "Triagem Automatizada (Sistema)",
-      id_especialidade: "Acolhimento Social Inicial",
+      id_voluntario: 'Triagem Automatizada (Sistema)',
+      id_especialidade: 'Acolhimento Social Inicial',
       data_inicio: dataTriagem.toISOString(),
       cpf_cliente: cpfLimpo,
     });
@@ -116,10 +145,14 @@ async function gerenciarSolicitarCPF(idUsuario, opcao, tentativasAtuais) {
 
 async function gerenciarTornarVoluntario(idUsuario, opcao, tentativasAtuais) {
   switch (opcao) {
-    case "0":
+    case '0':
       return await transicionarPara(idUsuario, EstadoConversa.BOAS_VINDAS, MENSAGENS.BOAS_VINDAS);
-    case "1":
-      return await transicionarPara(idUsuario, EstadoConversa.ATENDIMENTO_HUMANO, MENSAGENS.ATENDIMENTO_HUMANO);
+    case '1':
+      return await transicionarPara(
+        idUsuario,
+        EstadoConversa.ATENDIMENTO_HUMANO,
+        MENSAGENS.ATENDIMENTO_HUMANO,
+      );
     default:
       return processarOpcaoInvalida(idUsuario, EstadoConversa.TORNAR_VOLUNTARIO, tentativasAtuais);
   }
@@ -135,7 +168,7 @@ async function processarMensagem(idUsuario, opcao) {
   const tentativasAtuais = dadosEstado ? dadosEstado.tentativas_invalidas : 0;
 
   // Interceptador global do comando de reset
-  if (opcao === "#") {
+  if (opcao === '#') {
     return await transicionarPara(idUsuario, EstadoConversa.BOAS_VINDAS, MENSAGENS.BOAS_VINDAS);
   }
 

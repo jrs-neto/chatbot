@@ -12,7 +12,11 @@
   "ACOLHIMENTO_ORIENTACAO": {
     "estado": "ACOLHIMENTO_ORIENTACAO",
     "mensagem": "Perfeito! O Instituto Conecta Vida oferece suporte psicológico e social gratuito. Selecione uma opção:",
-    "menu": ["1. Agendar primeiro atendimento (Triagem)", "0. Voltar ao menu anterior", "#. Encerrar conversa"]
+    "menu": [
+      "1. Agendar primeiro atendimento (Triagem)",
+      "0. Voltar ao menu anterior",
+      "#. Encerrar conversa"
+    ]
   },
   "SOLICITAR_CPF": {
     "estado": "SOLICITAR_CPF",

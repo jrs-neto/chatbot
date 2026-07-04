@@ -1,4 +1,4 @@
-const agendamentoRepository = require("../repositories/agendamentoRepository");
+const agendamentoRepository = require('../repositories/agendamentoRepository');
 
 function listarTodosAgendamentos() {
   return agendamentoRepository.listarTodos();
