@@ -25,12 +25,94 @@
 
 ## 🎯 Sobre o Projeto
 
-Este é o repositório do backend do **Chatbot de Acolhimento Social** do **Instituto Conecta Vida**, um assistente virtual projetado para automatizar o primeiro contato e a triagem de usuários que necessitam de suporte psicológico e de assistência social. 
+Este é o repositório do backend do **Chatbot de Acolhimento Social** do **Instituto Conecta Vida**, um assistente virtual projetado para automatizar o primeiro contato e a triagem de usuários que necessitam de suporte psicológico e de assistência social.
 
-O sistema implementa uma **arquitetura de máquina de estados persistida**, permitindo gerenciar fluxos de conversação de forma contínua e integrada ao banco de dados relacional. Se o servidor for reiniciado ou a conexão for temporariamente interrompida, o chatbot recorda o contexto e o estado do usuário, garantindo a continuidade do atendimento.
+O sistema evoluiu de um chatbot operacional para uma arquitetura backend baseada em **máquina de estados persistida**, com controle de estado persistido no banco de dados (Supabase). Isso permite gerenciar fluxos de conversação de forma contínua e integrada ao banco de dados relacional. Se o servidor for reiniciado ou a conexão for temporariamente interrompida, o chatbot recorda o contexto e o estado do usuário, garantindo a continuidade do atendimento.
 
 > [!NOTE]
 > Este projeto foi desenvolvido para fins demonstrativos e acadêmicos, integrando competências de desenvolvimento backend em Node.js com serviços em nuvem (Supabase/PostgreSQL).
+
+------
+
+## 🏛️ Arquitetura do Sistema
+
+O projeto segue uma **arquitetura em camadas (Layered Architecture)**, na qual cada camada possui uma responsabilidade única e bem definida. Essa separação de responsabilidades facilita a manutenção, a testabilidade e a escalabilidade do sistema, garantindo que alterações em uma camada não impactem diretamente as demais.
+
+O fluxo de uma requisição inicia no webhook do chatbot, passa pelo controller para validação da entrada, segue para a camada de serviços onde as regras de negócio são executadas e, quando necessário, acessa os repositórios responsáveis pela comunicação com o banco de dados. Durante esse processo, funções utilitárias são utilizadas para validações e formatações, mantendo a lógica de negócio mais organizada.
+
+```mermaid
+flowchart TD
+    A[👤 Cliente\nRequisição HTTP POST] --> B[📡 Routes\nsrc/routes/api.js]
+    B --> C[🎛️ Controllers\nchatController.js]
+    C --> D[⚙️ Services\nchatbotService.js]
+    D --> E[🗃️ Repositories\nagendamentoRepository.js\nestadoRepository.js]
+    E --> F[(☁️ Supabase\nPostgreSQL)]
+
+    D -.->|Utiliza| U[🔧 Utils]
+    D -.->|Consome| M[📄 Data
+messages.json]
+    D -.->|Utiliza| K[📌 Constants
+estados.js]
+```
+
+| Camada | Diretório | Responsabilidade |
+| :--- | :--- | :--- |
+| **Routes** | `src/routes/` | Define os endpoints da API e encaminha as requisições para os controllers |
+| **Controllers** | `src/controllers/` | Valida os dados da requisição e aciona a camada de serviço |
+| **Services** | `src/services/` | Contém toda a lógica de negócio e a máquina de estados do chatbot |
+| **Repositories** | `src/repositories/` | Centraliza o acesso ao banco de dados, isolando as operações realizadas no Supabase |
+| **Utils** | `src/utils/` | Fornece funções auxiliares reutilizáveis (validação, formatação, higienização) |
+| **Constants** | `src/constants/` | Centraliza constantes utilizadas pela aplicação, como os estados da máquina de conversação |
+| **Config** | `src/config/` | Instancia e configura o cliente de acesso ao Supabase |
+| **Data** | `src/data/` | Armazena os textos e menus do chatbot em formato estático (JSON) |
+
+> [!TIP]
+> **Benefícios dessa arquitetura**
+> * Separação clara de responsabilidades
+> * Facilidade para manutenção e evolução do código
+> * Reutilização de funções utilitárias
+> * Menor acoplamento entre as camadas
+> * Código mais organizado e escalável
+
+
+------
+
+## 🔄 Fluxo do Chatbot
+
+A máquina de estados controla o progresso de cada usuário na conversa de forma individual e persistida. O diagrama abaixo representa os estados possíveis e as transições entre eles:
+
+```mermaid
+flowchart TD
+    START([🟢 Início]) --> BV
+
+    BV["💬 BOAS_VINDAS\nMenu principal"]
+    BV -->|Opção 1| AO["🤝 ACOLHIMENTO_ORIENTACAO\nOrientação sobre o serviço"]
+    BV -->|Opção 2| CPF["🪪 SOLICITAR_CPF\nInforme seu CPF"]
+    BV -->|Opção 3| TV["🙋 TORNAR_VOLUNTARIO\nInformações para voluntários"]
+
+    AO -->|Opção 0 - Voltar| BV
+    AO -->|Opção 1 - Agendar triagem| CPF
+    TV -->|Opção 0 - Voltar| BV
+    TV -->|Opção 1 - Falar com equipe| AH
+
+    CPF -->|CPF encontrado| AG["🗓️ Agendamento Localizado\nExibe dados do agendamento"]
+    CPF -->|CPF não encontrado| TR["✅ Triagem Criada\nNovo agendamento registrado"]
+    AG --> BV
+    TR --> BV
+
+    BV -->|3 tentativas inválidas| AH
+    AO -->|3 tentativas inválidas| AH
+    TV -->|3 tentativas inválidas| AH
+
+    AH["🧑‍💼 ATENDIMENTO_HUMANO\nEncaminhado à equipe"]
+
+    RESET(["# em qualquer estado"])
+    RESET -.->|Reinicia sessão| BV
+```
+
+Cada usuário é identificado por um `idUsuario` único. Ao receber uma mensagem, o sistema recupera o estado atual desse usuário no banco de dados e decide qual ação executar com base nesse estado — sem depender de variáveis em memória. Isso garante que o contexto da conversa seja mantido mesmo que o servidor seja reiniciado ou a conexão seja interrompida.
+
+As transições entre estados são gerenciadas por funções dedicadas dentro do `chatbotService.js`. Entradas inválidas incrementam um contador de tentativas; ao atingir três erros consecutivos em qualquer estado do fluxo, o usuário é automaticamente encaminhado para `ATENDIMENTO_HUMANO`. O comando `#` funciona como um atalho global que encerra a sessão corrente e retorna o usuário ao menu inicial (`BOAS_VINDAS`), independentemente do estado em que se encontra.
 
 ------
 
@@ -91,13 +173,18 @@ erDiagram
  ┣ 📂 src                    # Código-fonte da aplicação
  ┃ ┣ 📂 config               # Módulos de conexão e configuração
  ┃ ┃ ┗ 📜 database.js        # Instanciação do cliente Supabase
+ ┃ ┣ 📂 constants            # Constantes da aplicação
+ ┃ ┃ ┗ 📜 estados.js          # Enum dos estados da máquina de conversação
  ┃ ┣ 📂 controllers          # Controladores que gerenciam requisições e respostas
  ┃ ┃ ┣ 📜 agendamentoController.js # Controlador para agendamentos (estrutura futura)
- ┃ ┃ ┗ 📜 chatController.js   # Validador de dados recebidos no chat
+ ┃ ┃ ┗ 📜 chatController.js   # Valida e encaminha as requisições recebidas pelo webhook
  ┃ ┣ 📂 data                 # Arquivos de dados estáticos
  ┃ ┃ ┗ 📜 messages.json      # Fluxo de mensagens e menus estruturados do chatbot
- ┃ ┣ 📂 routes               # Definição dos roteadores de API
- ┃ ┃ ┗ 📜 api.js             # Rotas direcionadas para a API (/api/*)
+ ┃ ┣ 📂 repositories         # Acesso e persistência de dados no Supabase
+ ┃ ┃ ┣ 📜 agendamentoRepository.js # Operações de CRUD sobre a tabela agendamentos
+ ┃ ┃ ┗ 📜 estadoRepository.js  # Leitura e escrita do estado da conversa por usuário
+ ┃ ┣ 📂 routes               # Definição dos roteadores da aplicação
+ ┃ ┃ ┗ 📜 api.js             # Webhook do chatbot (/api/webhook) e rotas administrativas
  ┃ ┣ 📂 services             # Regras de negócio e motores lógicos
  ┃ ┃ ┗ 📜 chatbotService.js  # Lógica da máquina de estados do chatbot
  ┃ ┗ 📜 app.js               # Inicialização do servidor Express e Middlewares
@@ -147,12 +234,12 @@ O console exibirá a confirmação de que o servidor está em execução:
 
 ------
 
-## 🚀 Como Testar a API
+## 🚀 Como Testar o Webhook
 
-A comunicação principal é realizada via requisições HTTP utilizando o método `POST`.
+A comunicação principal é realizada via requisições HTTP utilizando o método `POST` diretamente no endpoint de webhook do chatbot.
 
-### Endpoint de Interação
-* **URL:** `http://localhost:3000/api/chat`
+### Endpoint de Webhook
+* **URL:** `http://localhost:3000/api/webhook`
 * **Método:** `POST`
 * **Headers:** `Content-Type: application/json`
 
@@ -180,7 +267,7 @@ O servidor retorna o texto formatado do menu subsequente e o respectivo estado d
 
 ## 🗂️ Fluxos de Demonstração (Massa de Testes)
 
-Utilize os roteiros abaixo no seu cliente HTTP (Insomnia, Postman ou cURL) para avaliar as ramificações lógicas da API:
+Utilize os roteiros abaixo no seu cliente HTTP (Insomnia, Postman ou cURL) para avaliar as ramificações lógicas do webhook do chatbot:
 
 ### 1. Consulta de Agendamento Existente (Sucesso)
 * Envie `"Olá"` para `idUsuario: "user-123"` para receber o menu principal.
