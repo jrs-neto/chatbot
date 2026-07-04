@@ -2,30 +2,12 @@ const agendamentoRepository = require("../repositories/agendamentoRepository");
 const estadoRepository = require("../repositories/estadoRepository");
 const EstadoConversa = require("../constants/estados");
 const MENSAGENS = require("../data/messages.json");
+const formatarResposta = require("../utils/formatarResposta");
+const validarCPF = require("../utils/validarCPF");
+const formatarData = require("../utils/formatarData");
+const higienizarTexto = require("../utils/higienizarTexto");
 
 // FUNÇÕES AUXILIARES
-
-/**
- * Higieniza o texto de entrada do usuário para facilitar comparações de saudações
- */
-function higienizarTexto(texto) {
-  return texto
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
-/**
- * Formata as saídas, evitando quebras caso o 'menu' seja undefined
- */
-function formatarResposta(contextoMensagem) {
-  const itensMenu = contextoMensagem.menu?.join("\n") || "";
-
-  return {
-    text: `${contextoMensagem.mensagem}${itensMenu ? `\n\n${itensMenu}` : ""}`,
-    estado: contextoMensagem.estado,
-  };
-}
 
 /**
  * Atalho para transicionar o usuário de estado, resetando as tentativas inválidas
@@ -89,9 +71,9 @@ async function gerenciarAcolhimento(idUsuario, opcao, tentativasAtuais) {
 }
 
 async function gerenciarSolicitarCPF(idUsuario, opcao, tentativasAtuais) {
-  const cpfLimpo = opcao.replace(/\D/g, "");
+  const cpfLimpo = validarCPF(opcao);
 
-  if (cpfLimpo.length !== 11) {
+  if (!cpfLimpo) {
     return processarOpcaoInvalida(
       idUsuario,
       EstadoConversa.SOLICITAR_CPF,
@@ -106,9 +88,7 @@ async function gerenciarSolicitarCPF(idUsuario, opcao, tentativasAtuais) {
   await estadoRepository.salvarEstadoUsuario(idUsuario, EstadoConversa.BOAS_VINDAS, 0);
 
   if (agendamento) {
-    const dataFormatada = new Date(agendamento.data_inicio).toLocaleString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-    });
+    const dataFormatada = formatarData(agendamento.data_inicio);
 
     return {
       text: `🗓️ **Agendamento Localizado!**\n\n• **Serviço:** ${agendamento.id_especialidade}\n• **Profissional:** ${agendamento.id_voluntario}\n• **Data/Hora:** ${dataFormatada}h\n\nO que deseja fazer agora? Digite qualquer mensagem para voltar ao menu principal.`,
@@ -125,9 +105,7 @@ async function gerenciarSolicitarCPF(idUsuario, opcao, tentativasAtuais) {
       cpf_cliente: cpfLimpo,
     });
 
-    const dataFormatada = new Date(novoAgendamento.data_inicio).toLocaleString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-    });
+    const dataFormatada = formatarData(novoAgendamento.data_inicio);
 
     return {
       text: `✅ **Triagem Agendada com Sucesso!**\n\nO seu primeiro contacto de acolhimento social foi registado no sistema.\n\n• **Agendamento:** ${novoAgendamento.id_especialidade}\n• **Data Estimada:** ${dataFormatada}h\n\nPor favor, guarde estas informações. Digite qualquer mensagem para regressar ao início.`,
