@@ -14,7 +14,7 @@ async function enviarMensagem(req, res) {
 
     return res.status(200).json(respostaBot);
   } catch (error) {
-    console.error("Erro no chatController:", error);
+    console.error("Erro ao enviar mensagem no chatController:", error);
     return res.status(500).json({
       error: "Ocorreu um erro interno no servidor ao processar a mensagem.",
     });

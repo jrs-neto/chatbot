@@ -9,6 +9,7 @@ async function listar(req, res) {
     const agendamentos = await agendamentoService.listarTodosAgendamentos();
     return res.status(200).json(agendamentos);
   } catch (error) {
+    console.error("Erro ao buscar a lista de agendamentos:", error);
     return res.status(500).json({ error: "Erro ao buscar a lista de agendamentos." });
   }
 }
@@ -20,10 +21,9 @@ async function listar(req, res) {
 async function atualizar(req, res) {
   try {
     const { id } = req.params;
-    const dadosParaAtualizar = req.body;
 
-    // Impede a alteração acidental de campos sensíveis como o ID do registro
-    delete dadosParaAtualizar.id;
+    // Desestruturação funcional para descartar o ID do corpo
+    const { id: _, ...dadosParaAtualizar } = req.body;
 
     const agendamentoAtualizado = await agendamentoService.atualizarAgendamento(id, dadosParaAtualizar);
 
@@ -36,6 +36,7 @@ async function atualizar(req, res) {
       data: agendamentoAtualizado,
     });
   } catch (error) {
+    console.error(`Erro ao atualizar o agendamento ID ${req.params.id}:`, error);
     return res.status(500).json({ error: "Erro ao tentar atualizar o agendamento." });
   }
 }
@@ -49,14 +50,11 @@ async function deletar(req, res) {
     const { id } = req.params;
     await agendamentoService.deletarAgendamento(id);
 
-    return res.status(200).json({ message: "Agendamento removido do sistema com sucesso." });
+    return res.status(200).json({ message: "Agendamento removido com sucesso!" });
   } catch (error) {
-    return res.status(500).json({ error: "Erro ao tentar remover o agendamento." });
+    console.error(`Erro ao deletar o agendamento ID ${req.params.id}:`, error);
+    return res.status(500).json({ error: "Erro ao tentar deletar o agendamento." });
   }
 }
 
-module.exports = {
-  listar,
-  atualizar,
-  deletar,
-};
+module.exports = { listar, atualizar, deletar };

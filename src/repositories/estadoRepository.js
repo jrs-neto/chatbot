@@ -8,12 +8,11 @@ async function buscarEstadoPorUsuario(idUsuario) {
 }
 
 async function salvarEstadoUsuario(idUsuario, estado, tentativas) {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("estados_conversa")
     .upsert({ id_usuario: idUsuario, estado, tentativas_invalidas: tentativas }, { onConflict: "id_usuario" });
 
   if (error) throw error;
-  return data;
 }
 
 module.exports = { buscarEstadoPorUsuario, salvarEstadoUsuario };
