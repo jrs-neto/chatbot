@@ -13,7 +13,7 @@ app.use(express.json()); // Permite que o servidor entenda dados enviados em for
 // Rotas da API
 app.use("/api", apiRoutes);
 
-// Rota simples de teste para garantir que o servidor está online
+// Rota de teste para garantir que o servidor está online
 app.get("/", (req, res) => {
   res.send("🚀 Servidor do Chatbot está online e funcionando perfeitamente!");
 });
