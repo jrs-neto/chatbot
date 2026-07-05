@@ -1,11 +1,44 @@
+# ========================
+# Dependências
+# ========================
 node_modules/
 
+# ========================
+# Variáveis de ambiente
+# ========================
 .env
+.env.*
+!.env.example
 
-.vscode/
+# ========================
+# Build / Output
+# ========================
+dist/
+build/
 
+# ========================
+# Logs
+# ========================
+*.log
+logs/
+
+# ========================
+# Cobertura de testes
+# ========================
 coverage/
 
-npm-debug.log
+# ========================
+# Certificados e chaves privadas
+# ========================
+*.pem
+*.key
+*.cert
+*.crt
 
+# ========================
+# Editores e SO
+# ========================
+.vscode/
+.idea/
 .DS_Store
+Thumbs.db

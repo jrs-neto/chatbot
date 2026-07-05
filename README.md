@@ -49,10 +49,8 @@ flowchart TD
     E --> F[(☁️ Supabase\nPostgreSQL)]
 
     D -.->|Utiliza| U[🔧 Utils]
-    D -.->|Consome| M[📄 Data
-messages.json]
-    D -.->|Utiliza| K[📌 Constants
-estados.js]
+    D -.->|Consome| M[📄 Data\nmessages.json]
+    D -.->|Utiliza| K[📌 Constants\nestados.js]
 ```
 
 | Camada           | Diretório           | Responsabilidade                                                                           |
@@ -110,7 +108,7 @@ flowchart TD
     RESET -.->|Reinicia sessão| BV
 ```
 
-Cada usuário é identificado por um `idUsuario` único. Ao receber uma mensagem, o sistema recupera o estado atual desse usuário no banco de dados e decide qual ação executar com base nesse estado — sem depender de variáveis em memória. Isso garante que o contexto da conversa seja mantido mesmo que o servidor seja reiniciado ou a conexão seja interrompida.
+Cada usuário é identificado por um `idUsuario` único. Ao receber uma mensagem, o sistema recupera o estado atual desse usuário no banco de dados e decide qual ação executar com base nesse estado sem depender de variáveis em memória. Isso garante que o contexto da conversa seja mantido mesmo que o servidor seja reiniciado ou a conexão seja interrompida.
 
 As transições entre estados são gerenciadas por funções dedicadas dentro do `chatbotService.js`. Entradas inválidas incrementam um contador de tentativas; ao atingir três erros consecutivos em qualquer estado do fluxo, o usuário é automaticamente encaminhado para `ATENDIMENTO_HUMANO`. O comando `#` funciona como um atalho global que encerra a sessão corrente e retorna o usuário ao menu inicial (`BOAS_VINDAS`), independentemente do estado em que se encontra.
 
@@ -125,6 +123,9 @@ As transições entre estados são gerenciadas por funções dedicadas dentro do
 | **Supabase (@supabase/supabase-js)** | Banco de dados relacional PostgreSQL na nuvem e persistência         | ^2.108.2 |
 | **dotenv**                           | Gerenciamento seguro de variáveis de ambiente                        | ^17.4.2  |
 | **cors**                             | Habilitação e controle de compartilhamento de recursos entre origens | ^2.8.6   |
+| **Jest**                             | Framework de testes automatizados                                    | ^30.4.2  |
+| **ESLint**                           | Linter para padronização e análise estática de código                | ^10.6.0  |
+| **Prettier**                         | Formatador de código para consistência de estilo                     | ^5.5.6   |
 
 ---
 
@@ -169,14 +170,13 @@ erDiagram
 ```text
 📦 chatbot
  ┣ 📂 assets                 # Imagens, diagramas e recursos visuais do repositório
- ┣ 📂 readmes                # Modelos de README utilizados como referência de estilo
  ┣ 📂 src                    # Código-fonte da aplicação
  ┃ ┣ 📂 config               # Módulos de conexão e configuração
  ┃ ┃ ┗ 📜 database.js        # Instanciação do cliente Supabase
  ┃ ┣ 📂 constants            # Constantes da aplicação
  ┃ ┃ ┗ 📜 estados.js          # Enum dos estados da máquina de conversação
  ┃ ┣ 📂 controllers          # Controladores que gerenciam requisições e respostas
- ┃ ┃ ┣ 📜 agendamentoController.js # Controlador para agendamentos (estrutura futura)
+ ┃ ┃ ┣ 📜 agendamentoController.js # Controlador para agendamentos (REST API)
  ┃ ┃ ┗ 📜 chatController.js   # Valida e encaminha as requisições recebidas pelo webhook
  ┃ ┣ 📂 data                 # Arquivos de dados estáticos
  ┃ ┃ ┗ 📜 messages.json      # Fluxo de mensagens e menus estruturados do chatbot
@@ -188,7 +188,11 @@ erDiagram
  ┃ ┣ 📂 services             # Regras de negócio e motores lógicos
  ┃ ┃ ┗ 📜 chatbotService.js  # Lógica da máquina de estados do chatbot
  ┃ ┗ 📜 app.js               # Inicialização do servidor Express e Middlewares
- ┣ 📜 .env                   # Credenciais e variáveis de ambiente (privado)
+ ┣ 📂 tests                  # Testes automatizados da aplicação
+ ┃ ┣ 📜 chatbotService.test.js # Testes da máquina de estados
+ ┃ ┗ 📜 estadoRepository.test.js # Estrutura de testes para persistência
+ ┣ 📜 .env.example           # Exemplo estruturado das configurações locais
+ ┣ 📜 .gitignore             # Arquivos ignorados pelo sistema de versionamento Git
  ┗ 📜 package.json           # Dependências e scripts de desenvolvimento
 ```
 
@@ -217,7 +221,11 @@ npm install
 
 ### Passo 3: Configurar Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto e preencha-o com as chaves correspondentes:
+Crie um arquivo `.env` na raiz do projeto baseado no `.env.example`:
+
+Copie o arquivo `.env.example` para `.env` e preencha as variáveis de ambiente.
+
+Abra o arquivo `.env` e preencha as variáveis de ambiente com as credenciais do seu projeto Supabase:
 
 ```env
 PORT=3000
@@ -227,7 +235,7 @@ SUPABASE_KEY=sua-chave-anon-public-supabase
 
 ### Passo 4: Executar a Aplicação
 
-Inicie o servidor Express localmente com o comando:
+Inicie o servidor Express localmente em ambiente de desenvolvimento (com recarregamento automático):
 
 ```bash
 npm run dev
@@ -243,15 +251,44 @@ O console exibirá a confirmação de que o servidor está em execução:
 
 ---
 
+## 🧪 Execução de Testes Automatizados
+
+A aplicação conta com uma suíte de testes unitários automatizados cobrindo a máquina de estados, regras de transição, contadores de tentativas inválidas e a validação de fluxos.
+
+Os testes foram desenvolvidos utilizando o **Jest** e utilizam mocks estruturados para isolar completamente a camada de persistência.
+
+Para executar todos os testes da aplicação:
+
+```bash
+npm test
+```
+
+Para executar os testes em tempo real (Watch Mode):
+
+```bash
+npx jest --watch
+```
+
+---
+
 ## 🚀 Como Testar o Webhook
 
 A comunicação principal é realizada via requisições HTTP utilizando o método `POST` diretamente no endpoint de webhook do chatbot.
 
 ### Endpoint de Webhook
 
-- **URL:** `http://localhost:3000/api/webhook`
-- **Método:** `POST`
-- **Headers:** `Content-Type: application/json`
+**Produção (Render)**
+```http
+POST https://chatbot-conecta-vida.onrender.com/api/webhook
+```
+
+**Desenvolvimento Local**
+```http
+POST http://localhost:3000/api/webhook
+```
+
+Headers:
+Content-Type: application/json
 
 #### Corpo da Requisição (JSON)
 
@@ -304,6 +341,35 @@ Utilize os roteiros abaixo no seu cliente HTTP (Insomnia, Postman ou cURL) para 
 
 ---
 
+## ☁️ Implantação (Deploy no Render)
+
+A API e o Webhook do Chatbot estão publicados em produção e podem ser acessados publicamente:
+
+🌐 **URL de Produção:** [https://chatbot-conecta-vida.onrender.com/](https://chatbot-conecta-vida.onrender.com/)
+
+---
+
+### Passos de Configuração do Web Service no Render (Hospedagem Própria)
+
+Este projeto está estruturado para ser facilmente hospedado no **[Render](https://render.com/)** como um **Web Service**.
+
+### Passos de Configuração do Web Service no Render
+
+1. Crie uma conta ou faça login no painel do [Render](https://render.com/).
+2. Clique em **New** > **Web Service**.
+3. Conecte o seu repositório do GitHub contendo este projeto.
+4. Configure as seguintes propriedades do serviço:
+   - **Environment:** `Node`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+5. Acesse a aba **Environment** e configure as seguintes variáveis de ambiente:
+   - `PORT`: Porta onde o Express ouvirá (o Render injetará isso automaticamente, mas o padrão interno é configurado).
+   - `SUPABASE_URL`: A URL do seu banco de dados Supabase.
+   - `SUPABASE_KEY`: A chave anônima (anon key) do seu banco Supabase.
+6. Clique em **Create Web Service** para iniciar a implantação.
+
+---
+
 ## 🤝 Contribuições
 
 Este repositório possui fins educacionais e de demonstração prática. Sugestões de melhorias ou correções de bugs podem ser enviadas por meio de **Issues** ou **Pull Requests**.
@@ -318,9 +384,9 @@ Este projeto está licenciado sob a licença **MIT** — livre para uso educacio
 
 ## 📞 Contato
 
-Desenvolvido por [**José Rodrigues**](https://github.com/jrs-neto)
+Desenvolvido por [**José Rodrigues**](https://github.com/jrs-neto)  
 Para dúvidas, sugestões ou colaborações, utilize as **issues do GitHub** ou entre em contato diretamente pelo perfil:
 
-- 🔗 **GitHub:** https://github.com/jrs-neto
-- 🔗 **LinkedIn:** https://www.linkedin.com/in/jrodrigues-neto/
-- 🔗 **Portfólio:** https://jrs-neto.github.io/portfolio/
+- 🔗 **GitHub:** [jrs-neto](https://github.com/jrs-neto)
+- 🔗 **LinkedIn:** [jrodrigues-neto](https://www.linkedin.com/in/jrodrigues-neto/)
+- 🔗 **Portfólio:** [portfolio](https://jrs-neto.github.io/portfolio/)
